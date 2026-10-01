@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Canteen Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="admin-bg">
+<header class="app-header">
+  <div class="container py-3">
+    <div class="brand-row">
+      <div class="brand"><span class="brand-icon">⚙️</span><span><strong>Admin Panel</strong><small>Menu Management</small></span></div>
+      <div class="header-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-dark btn-sm">View Canteen</a>
+        <a href="{{ url_for('admin_logout') }}" class="btn btn-danger btn-sm">Logout</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container py-4">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="admin-top mb-3">
+    <div>
+      <h2 class="mb-1">Food Items</h2>
+      <p class="text-muted mb-0">Logged in as {{ username }} · Time-based menu updates automatically.</p>
+    </div>
+    <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#foodModal" onclick="prepareAdd()">+ Add Food</button>
+  </div>
+
+  <div class="table-responsive bg-white rounded-4 shadow-sm">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr><th>Food</th><th>Category</th><th>Price</th><th>Stock</th><th>Time</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+      {% for p in products %}
+        <tr>
+          <td><span class="fs-4">{{ p['icon'] }}</span> <strong>{{ p['name'] }}</strong></td>
+          <td>{{ p['category'] }}</td>
+          <td>₹{{ "%.0f"|format(p['price']) }}</td>
+          <td>
+            {% if p['stock'] > 0 %}
+              <span class="badge text-bg-info">{{ p['stock'] }}</span>
+            {% else %}
+              <span class="badge text-bg-danger">0</span>
+            {% endif %}
+          </td>
+          <td>{{ p['start_time'] }} – {{ p['end_time'] }}</td>
+          <td>
+            {% if p['active'] %}
+              <span class="badge text-bg-success">Shown</span>
+            {% else %}
+              <span class="badge text-bg-secondary">Hidden</span>
+            {% endif %}
+          </td>
+          <td class="text-nowrap">
+            <button class="btn btn-sm btn-outline-primary"
+              data-bs-toggle="modal" data-bs-target="#foodModal"
+              onclick='prepareEdit({{ p["id"]|tojson }}, {{ p["name"]|tojson }}, {{ p["price"]|tojson }}, {{ p["category"]|tojson }}, {{ p["icon"]|tojson }}, {{ p["start_time"]|tojson }}, {{ p["end_time"]|tojson }}, {{ p["stock"]|tojson }}, {{ p["active"]|tojson }})'>Edit</button>
+            <form method="post" action="{{ url_for('delete_product', product_id=p['id']) }}" class="d-inline" onsubmit="return confirm('Delete this food item?')">
+              <button class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<div class="modal fade" id="foodModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" action="{{ url_for('save_product') }}">
+        <div class="modal-header">
+          <h5 id="foodModalTitle" class="modal-title">Add Food</h5>
+          <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="itemId" name="id">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Food name</label>
+              <input id="foodName" name="name" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Price</label>
+              <input id="foodPrice" name="price" type="number" min="0" step="0.01" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Stock / Quantity</label>
+              <input id="foodStock" name="stock" type="number" min="0" step="1" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Icon</label>
+              <input id="foodIcon" name="icon" class="form-control" placeholder="🍛">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Category</label>
+              <select id="foodCategory" name="category" class="form-select">
+                <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Drinks</option><option>Snacks</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Start time</label>
+              <input id="foodStart" name="start_time" type="time" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">End time</label>
+              <input id="foodEnd" name="end_time" type="time" class="form-control" required>
+            </div>
+            <div class="col-12">
+              <div class="form-check">
+                <input id="foodActive" name="active" class="form-check-input" type="checkbox" checked>
+                <label class="form-check-label">Show this item to customers</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-dark" type="submit">Save Food Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function prepareAdd() {
+  document.getElementById("foodModalTitle").textContent = "Add Food";
+  document.getElementById("itemId").value = "";
+  document.getElementById("foodName").value = "";
+  document.getElementById("foodPrice").value = "";
+  document.getElementById("foodIcon").value = "🍽️";
+  document.getElementById("foodStock").value = "100";
+  document.getElementById("foodCategory").value = "Breakfast";
+  document.getElementById("foodStart").value = "05:00";
+  document.getElementById("foodEnd").value = "11:00";
+  document.getElementById("foodActive").checked = true;
+}
+function prepareEdit(id, name, price, category, icon, start, end, stock, active) {
+  document.getElementById("foodModalTitle").textContent = "Edit Food";
+  document.getElementById("itemId").value = id;
+  document.getElementById("foodName").value = name;
+  document.getElementById("foodPrice").value = price;
+  document.getElementById("foodStock").value = stock;
+  document.getElementById("foodIcon").value = icon;
+  document.getElementById("foodCategory").value = category;
+  document.getElementById("foodStart").value = start;
+  document.getElementById("foodEnd").value = end;
+  document.getElementById("foodActive").checked = active;
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
