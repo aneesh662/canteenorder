@@ -378,10 +378,14 @@ def confirm_order(order_id):
                 return redirect(url_for("admin_orders"))
 
         for item in items:
-            db.execute(
-                "UPDATE products SET stock=stock-?, updated_at=CURRENT_TIMESTAMP WHERE id=?",
-                (item["quantity"], item["product_id"])
+            cur = db.execute(
+                """UPDATE products SET stock=stock-?, updated_at=CURRENT_TIMESTAMP
+                   WHERE id=? AND stock>=?""",
+                (item["quantity"], item["product_id"], item["quantity"])
             )
+            if cur.rowcount != 1:
+                flash(f"Stock changed while accepting {item['product_name']}. Order not confirmed.", "danger")
+                return redirect(url_for("admin_orders"))
 
         db.execute(
             "UPDATE orders SET status='Confirmed', confirmed_at=CURRENT_TIMESTAMP WHERE id=?",
