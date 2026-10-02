@@ -74,4 +74,4 @@ function reportMessage(){
 function printReport(){window.print();}
 function shareWhatsApp(){const text=reportMessage();window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank','noopener,noreferrer');}
 </script>
-</body></html>
+<script src="{{ url_for('static', filename='js/admin_alarm.js') }}"></script></body></html>

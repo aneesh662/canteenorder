@@ -23,3 +23,6 @@ main.container{max-width:1180px}.hero-card{margin-top:4px}.category-btn{min-heig
 @media print{
   body{background:#fff!important;padding:0!important}.no-print,.admin-nav{display:none!important}.report-page{max-width:100%;padding:0!important}.print-only{display:block}.report-print-header{margin-bottom:20px}.report-page .card,.report-page .kpi{box-shadow:none!important;border:1px solid #ddd}.report-page .table-responsive{overflow:visible}.report-page table{font-size:12px}.report-page .card-header{background:#f1f1f1!important}.report-actions{display:none!important}
 }
+
+/* Admin new-order alarm */
+.order-alarm-bar{position:sticky;top:0;z-index:2000;display:flex;align-items:center;justify-content:center;gap:4px;min-height:44px;padding:7px 12px;background:#111827;color:#fff;font-weight:700;font-size:14px;box-shadow:0 3px 12px #0003}.order-alarm-bar.active{background:#b91c1c;animation:alarmPulse 1s infinite}.order-alarm-bar .btn{font-weight:800}@keyframes alarmPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.18)}}@media(max-width:575px){.order-alarm-bar{font-size:11px;min-height:48px;padding:6px 8px}.order-alarm-bar .btn{font-size:11px;padding:5px 8px}}

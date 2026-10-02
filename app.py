@@ -354,6 +354,14 @@ def create_order():
         return jsonify({"error": "Invalid order data."}), 400
 
 
+@app.get("/api/admin/pending-count")
+@admin_required
+def admin_pending_count():
+    with get_db() as db:
+        row = db.execute("SELECT COUNT(*) AS pending_count, COALESCE(MAX(id), 0) AS latest_id FROM orders WHERE status='Pending'").fetchone()
+    return jsonify({"pending_count": int(row["pending_count"]), "latest_id": int(row["latest_id"])})
+
+
 @app.get("/admin/orders")
 @admin_required
 def admin_orders():
