@@ -74,6 +74,7 @@ def init_db():
             CREATE TABLE IF NOT EXISTS orders (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 customer_name TEXT,
+                contact_number TEXT,
                 table_room TEXT,
                 note TEXT,
                 total REAL NOT NULL DEFAULT 0,
@@ -82,6 +83,10 @@ def init_db():
                 confirmed_at TEXT
             )
         """)
+        order_cols = {r["name"] for r in db.execute("PRAGMA table_info(orders)").fetchall()}
+        if "contact_number" not in order_cols:
+            db.execute("ALTER TABLE orders ADD COLUMN contact_number TEXT")
+
         db.execute("""
             CREATE TABLE IF NOT EXISTS order_items (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -279,8 +284,19 @@ def delete_product(product_id):
 def create_order():
     data = request.get_json(silent=True) or {}
     name = str(data.get("name", "")).strip()
+    contact_number = str(data.get("contact_number", "")).strip()
     table_room = str(data.get("table_room", "")).strip()
     note = str(data.get("note", "")).strip()
+
+    if not name:
+        return jsonify({"error": "Please enter customer name."}), 400
+    if not contact_number:
+        return jsonify({"error": "Please enter contact number."}), 400
+    digits = "".join(ch for ch in contact_number if ch.isdigit())
+    if len(digits) < 10 or len(digits) > 15:
+        return jsonify({"error": "Please enter a valid contact number (10-15 digits)."}), 400
+    if not table_room:
+        return jsonify({"error": "Please enter table or room number."}), 400
     items = data.get("items", [])
 
     if not isinstance(items, list) or not items:
@@ -318,9 +334,9 @@ def create_order():
                 order_lines.append((pid, p["name"], p["price"], qty, amount))
 
             cur = db.execute("""
-                INSERT INTO orders (customer_name, table_room, note, total, status)
-                VALUES (?, ?, ?, ?, 'Pending')
-            """, (name, table_room, note, total))
+                INSERT INTO orders (customer_name, contact_number, table_room, note, total, status)
+                VALUES (?, ?, ?, ?, ?, 'Pending')
+            """, (name, contact_number, table_room, note, total))
             order_id = cur.lastrowid
 
             db.executemany("""
