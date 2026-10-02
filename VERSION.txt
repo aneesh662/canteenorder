@@ -1,19 +1,16 @@
-Canteen Ordering System
-Build: 2026-10-02 Mobile Cart + Contact Order
+Canteen Flask SQLite - Mobile Responsive Update
+Version: 2026-10-02-v4
 
-Customer:
-- Name required
-- Contact Number required
-- Table/Room required
-- Optional Note
-- Add to Cart
-- Top Cart icon + item badge
-- Fixed bottom Selected Items slider
-- Full responsive cart drawer
-- Direct SQLite Pending order
-
-Admin:
-- Contact number visible/click-to-call
-- Full food ordered details
-- Accept Order & Deduct Stock
-- Confirmed sales reports
+Changes:
+- Choose quantity directly on food card before Add to Cart.
+- Top cart icon with selected-item badge.
+- Fixed mobile/tablet Selected Items cart slider.
+- Contact number required and saved with every order.
+- Admin contact number display and click-to-call.
+- Admin button remains visible on small mobile screens.
+- Sales report Print / Save PDF support.
+- Sales report Send to WhatsApp support (report summary text).
+- Serving times use Asia/Kolkata (IST), including Breakfast 05:00-11:00.
+- Food cards show serving time and current availability.
+- Active food categories remain visible even outside their serving period.
+- Sales report daily grouping uses IST.

@@ -11,3 +11,15 @@ main.container{max-width:1180px}.hero-card{margin-top:4px}.category-btn{min-heig
   .brand{font-size:18px}.subtitle{display:none}.admin-link{display:none}.top-cart-btn{margin-left:auto}.hero-card h1{font-size:22px}.hero-card p{font-size:14px}.food-card{padding:13px}.food-icon{font-size:36px}.food-name{font-size:16px}.cart-slider>span:nth-child(2){font-size:13px}.cart-slider small{font-size:10px}.cart-slider-total{font-size:14px}
 }
 @media(min-width:768px){body{padding-bottom:100px}.cart-slider{bottom:18px}}
+
+/* Final responsive/admin/report improvements */
+.food-add-row{display:flex;align-items:center;gap:8px}.quick-qty{display:flex;align-items:center;gap:4px;border:1px solid #d1d5db;border-radius:10px;padding:3px;background:#f8fafc}.quick-qty span{min-width:28px;text-align:center;font-weight:800}.qty-btn{min-width:38px!important;min-height:38px!important;padding:4px 9px!important}.food-price{font-size:20px}.admin-nav-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.report-print-header{display:none}.report-actions .btn{min-height:42px}
+@media(max-width:767px){
+  .admin-nav .container-fluid{padding-left:10px;padding-right:10px;align-items:center}.admin-nav .navbar-brand{font-size:16px;margin-right:4px}.admin-nav-actions{gap:5px;justify-content:flex-end}.admin-nav-actions .btn{font-size:11px;padding:7px 8px}.food-add-row{align-items:stretch}.quick-qty{flex:0 0 auto}.quick-qty .qty-btn{min-width:38px}.food-add-row>.btn{min-height:44px}.report-actions{width:100%}.report-actions .btn{flex:1 1 180px}.kpi{padding:16px}.kpi strong{font-size:26px}
+}
+@media(max-width:420px){
+  .top-actions .admin-link{display:inline-flex!important;font-size:11px;padding:6px 7px;min-height:40px}.top-cart-btn{width:48px;min-width:48px}.admin-nav-actions .btn{font-size:10px;padding:6px 6px}.admin-nav .navbar-brand{font-size:14px}.admin-nav-actions{gap:3px}.food-add-row{gap:5px}.quick-qty .qty-btn{min-width:34px!important;padding:3px 7px!important}.quick-qty span{min-width:23px}.food-add-row>.btn{font-size:13px;padding-left:8px;padding-right:8px}
+}
+@media print{
+  body{background:#fff!important;padding:0!important}.no-print,.admin-nav{display:none!important}.report-page{max-width:100%;padding:0!important}.print-only{display:block}.report-print-header{margin-bottom:20px}.report-page .card,.report-page .kpi{box-shadow:none!important;border:1px solid #ddd}.report-page .table-responsive{overflow:visible}.report-page table{font-size:12px}.report-page .card-header{background:#f1f1f1!important}.report-actions{display:none!important}
+}

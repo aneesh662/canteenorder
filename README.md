@@ -1,95 +1,63 @@
 # Canteen Ordering System — Flask + SQLite
 
-A complete direct-order canteen system with a mobile-first customer cart, contact number capture, SQLite orders, inventory control, admin order acceptance, and sales reports.
+A responsive canteen ordering system for mobile, tablet, laptop and desktop.
 
-## Customer ordering workflow
+## Customer flow
+1. Open the canteen menu.
+2. Choose the quantity directly on each food card using + / -.
+3. Tap **Add N to Cart**.
+4. The fixed **Selected Items** slider stays available at the bottom.
+5. The top 🛒 cart icon also shows the selected quantity.
+6. Open the cart and review items.
+7. Enter Customer Name, Contact Number, Table/Room and optional Note.
+8. Tap **Place Order**.
+9. The order is saved directly to SQLite as **Pending**.
+10. The customer receives the Order Number.
 
-1. Customer opens the food menu on a phone, tablet, laptop, or desktop.
-2. Customer taps **Add to Cart** on a food item.
-3. The item immediately appears in the **Selected Items** cart.
-4. A fixed **🛒 Selected Items** slider remains visible at the bottom while the customer browses.
-5. The top **🛒 Cart** button also shows the selected-item count and opens the same cart.
-6. Customer taps the slider or top Cart button to open the full cart.
-7. In the cart the customer can increase/decrease quantity or remove food.
-8. Customer enters:
-   - **Customer Name** — required
-   - **Contact Number** — required
-   - **Table / Room** — required
-   - **Note** — optional
-9. Customer taps **Place Order**.
-10. Browser sends the order to `POST /api/orders`.
-11. Flask validates the customer details, contact number, food items, serving time, and available stock.
-12. The order and all order items are saved directly into SQLite with status **Pending**. Stock is NOT deducted at this stage.
-13. Customer receives an Order # confirmation.
+## Admin flow
+- Admin login
+- Food & Stock management
+- Edit food, price, stock, category, icon and serving time
+- Customer Orders
+- Customer contact number with click-to-call
+- Accept Order & Deduct Stock
+- Cancel Pending Order
+- Sales Report
+- Print / Save PDF
+- Send report summary to WhatsApp
 
-## Admin workflow
+## Serving times (India / IST)
+- Breakfast: 05:00–11:00
+- Lunch: 11:00–15:00
+- Dinner: 15:00–22:00
+- Drinks and Snacks: 00:00–23:59
 
-1. Admin opens **Customer Orders**.
-2. Each order shows:
-   - Order number/date
-   - Customer name
-   - Contact number (clickable `tel:` link)
-   - Table / Room
-   - Note
-   - Full food ordered list
-   - Unit price
-   - Quantity
-   - Amount
-   - Order total
-3. Admin clicks **Accept Order & Deduct Stock**.
-4. Flask rechecks stock and deducts the ordered quantity atomically.
-5. Order changes from **Pending** to **Confirmed**.
-6. Only Confirmed orders are included in Sales Reports.
+The application explicitly uses `Asia/Kolkata` so hosting server timezone does not incorrectly hide Breakfast/Lunch/Dinner.
 
-## Mobile responsive behavior
-
-- Responsive Bootstrap layout for phone, tablet, laptop, and desktop.
-- Large touch-friendly Add to Cart and quantity controls.
-- Top Cart button is always accessible.
-- Bottom Selected Items slider is always accessible while browsing.
-- On phones/tablets the cart uses a full-width offcanvas/bottom-friendly layout.
-- On larger screens the cart uses a right-side drawer.
-- Customer fields are inside the cart so the complete order can be reviewed before submission.
-
-## Local run
-
-```text
+## Run locally
+```bash
 py -3.13 -m venv venv
 venv\\Scripts\\activate
 pip install -r requirements.txt
 python app.py
 ```
 
-Customer: `http://127.0.0.1:5000`
+Customer: http://127.0.0.1:5000
+Admin: http://127.0.0.1:5000/admin/login
 
-Admin: `http://127.0.0.1:5000/admin/login`
+Default local admin:
+- Username: admin
+- Password: admin123
 
-Default local admin: `admin` / `admin123`
+For production, set `ADMIN_USERNAME`, `ADMIN_PASSWORD` or `ADMIN_PASSWORD_HASH`, `SECRET_KEY`, and `DB_PATH` as environment variables.
 
-For production, set `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `SECRET_KEY` as environment variables.
-
-## Render deployment
-
+## Render
 Build command:
-
 ```text
 pip install -r requirements.txt
 ```
-
 Start command:
-
 ```text
 gunicorn app:app
 ```
-
-Recommended environment variables:
-
-```text
-PYTHON_VERSION=3.13
-ADMIN_USERNAME=<your-admin>
-ADMIN_PASSWORD=<strong-password>
-SECRET_KEY=<strong-random-secret>
-DB_PATH=/var/data/canteen.db
-```
-
-Mount a persistent Render disk at `/var/data` so SQLite data survives redeploys.
+For persistent SQLite on Render, use a persistent disk and set `DB_PATH=/var/data/canteen.db`.

@@ -2,6 +2,7 @@ import os
 import sqlite3
 from functools import wraps
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 from flask import Flask, jsonify, render_template, request, session, redirect, url_for, flash
@@ -18,6 +19,7 @@ app.secret_key = os.getenv("SECRET_KEY", "change-this-secret-key-in-production")
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
 ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH", "")
+IST = ZoneInfo("Asia/Kolkata")
 
 DEFAULT_PRODUCTS = [
     ("Dosa", 40, "Breakfast", "🥞", "05:00", "11:00", 1),
@@ -125,7 +127,7 @@ def minutes_from_time(value):
 def item_available(row, now=None):
     if not row["active"]:
         return False
-    now = now or datetime.now()
+    now = now or datetime.now(IST)
     current = now.hour * 60 + now.minute
     start = minutes_from_time(row["start_time"])
     end = minutes_from_time(row["end_time"])
@@ -138,7 +140,8 @@ def item_available(row, now=None):
 
 
 def current_meal():
-    mins = datetime.now().hour * 60 + datetime.now().minute
+    now = datetime.now(IST)
+    mins = now.hour * 60 + now.minute
     if 300 <= mins < 660:
         return "Breakfast"
     if 660 <= mins < 900:
@@ -159,6 +162,7 @@ def row_to_dict(row):
         "end_time": row["end_time"],
         "stock": row["stock"],
         "active": bool(row["active"]),
+        "available_now": item_available(row),
     }
 
 
@@ -181,11 +185,11 @@ def api_menu():
     with get_db() as db:
         rows = db.execute("SELECT * FROM products ORDER BY category, name, id").fetchall()
 
-    available = [row_to_dict(r) for r in rows if item_available(r) and r["stock"] > 0]
+    available = [row_to_dict(r) for r in rows if r["active"]]
     return jsonify({
         "items": available,
         "meal": current_meal(),
-        "updated": datetime.now().strftime("%I:%M %p"),
+        "updated": datetime.now(IST).strftime("%I:%M %p"),
     })
 
 
@@ -430,8 +434,9 @@ def cancel_order(order_id):
 @app.get("/admin/reports")
 @admin_required
 def admin_reports():
-    start = request.args.get("start", datetime.now().strftime("%Y-%m-%d"))
-    end = request.args.get("end", datetime.now().strftime("%Y-%m-%d"))
+    today_ist = datetime.now(IST).strftime("%Y-%m-%d")
+    start = request.args.get("start", today_ist)
+    end = request.args.get("end", today_ist)
 
     with get_db() as db:
         summary = db.execute("""
@@ -444,7 +449,7 @@ def admin_reports():
                 ),0) AS item_qty
             FROM orders o
             WHERE status='Confirmed'
-              AND date(confirmed_at) BETWEEN date(?) AND date(?)
+              AND date(datetime(confirmed_at, '+5 hours', '+30 minutes')) BETWEEN date(?) AND date(?)
         """, (start, end)).fetchone()
 
         item_summary = db.execute("""
@@ -454,19 +459,19 @@ def admin_reports():
             FROM order_items oi
             JOIN orders o ON o.id = oi.order_id
             WHERE o.status='Confirmed'
-              AND date(o.confirmed_at) BETWEEN date(?) AND date(?)
+              AND date(datetime(o.confirmed_at, '+5 hours', '+30 minutes')) BETWEEN date(?) AND date(?)
             GROUP BY product_name
             ORDER BY sales DESC
         """, (start, end)).fetchall()
 
         daily = db.execute("""
-            SELECT date(confirmed_at) AS sale_date,
+            SELECT date(datetime(confirmed_at, '+5 hours', '+30 minutes')) AS sale_date,
                    COUNT(*) AS orders,
                    SUM(total) AS sales
             FROM orders
             WHERE status='Confirmed'
-              AND date(confirmed_at) BETWEEN date(?) AND date(?)
-            GROUP BY date(confirmed_at)
+              AND date(datetime(confirmed_at, '+5 hours', '+30 minutes')) BETWEEN date(?) AND date(?)
+            GROUP BY date(datetime(confirmed_at, '+5 hours', '+30 minutes'))
             ORDER BY sale_date DESC
         """, (start, end)).fetchall()
 
